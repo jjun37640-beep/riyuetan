@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>日月潭 - 课文跟读与本课生字</title>
+  <!-- 引入汉字笔顺动画库 Hanzi Writer -->
+  <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"></script>
+  <style>
+    :root {
+      --bg-cream: #f6f1e5;
+      --bg-paper: #faf6ec;
+      --navy-deep: #162638;
+      --navy-card: #1c324a;
+      --navy-dark: #0f1c2b;
+      --gold-primary: #d4af37;
+      --gold-light: #f3e5ab;
+      --gold-border: #c89d3c;
+      --gold-deep: #997322;
+      --cinnabar-red: #8f281e;
+      --ink-charcoal: #2a241e;
+      --ink-muted: #6b6357;
+      --grid-red: #c2410c;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: #22201d;
+      background-image: 
+        radial-gradient(#3a362f 1px, transparent 1px),
+        radial-gradient(#2f2a24 1px, #1a1816 100%);
+      background-size: 24px 24px, 100% 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Kaiti", serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 24px 14px 60px;
+      color: var(--ink-charcoal);
+    }
+
+    /* 古典宣纸装帧主容器 */
+    .book-cover-frame {
+      width: 100%;
+      max-width: 1060px;
+      background-color: var(--bg-paper);
+      background-image: 
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,0.4) 0%, rgba(228, 217, 196, 0.25) 100%),
+        radial-gradient(rgba(180, 160, 130, 0.18) 1px, transparent 1px);
+      background-size: 100% 100%, 18px 18px;
+      border: 3px solid #1a1815;
+      border-radius: 4px;
+      box-shadow: 
+        0 25px 60px rgba(0, 0, 0, 0.65),
+        inset 0 0 0 4px var(--bg-paper),
+        inset 0 0 0 5.5px #3a3228,
+        inset 0 0 35px rgba(160, 130, 90, 0.18);
+      padding: 34px 38px 40px;
+      position: relative;
+    }
+
+    /* 顶部居中标题区 */
+    .header-zone {
+      text-align: center;
+      margin-bottom: 22px;
+    }
+    .header-meta {
+      font-size: 11px;
+      letter-spacing: 5px;
+      color: #927e65;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+    .main-title {
+      font-family: "KaiTi", "STKaiti", "楷体", serif;
+      font-size: 34px;
+      font-weight: bold;
+      color: #241d17;
+      letter-spacing: 5px;
+      border: 1.5px dashed transparent;
+      padding: 4px 20px;
+      border-radius: 6px;
+      display: inline-block;
+      transition: all 0.2s;
+    }
+    .main-title:hover {
+      border-color: #d1b88e;
+      background: rgba(255,255,255,0.5);
+    }
+
+    /* 核心藏青金边皮纹铭牌（歌词滚动视窗） */
+    .plaque-wrapper {
+      position: relative;
+      margin: 0 auto 22px;
+      width: 100%;
+      border-radius: 8px;
+      background: linear-gradient(145deg, #182e44, #0e1a26);
+      box-shadow: 
+        0 14px 35px rgba(10, 18, 28, 0.55),
+        0 2px 6px rgba(0,0,0,0.3);
+      padding: 6px;
+    }
+    .plaque-gold-rim {
+      border: 2px solid var(--gold-border);
+      border-radius: 5px;
+      padding: 3px;
+      box-shadow: 
+        inset 0 0 0 1.5px rgba(255, 235, 170, 0.45),
+        inset 0 0 18px rgba(0, 0, 0, 0.8);
+      background: 
+        radial-gradient(circle at 50% 20%, rgba(45, 80, 115, 0.4) 0%, transparent 80%),
+        repeating-linear-gradient(45deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 2px, transparent 2px, transparent 4px),
+        #122233;
+      position: relative;
+    }
+
+    /* 铭牌顶部工具栏（拼音开关等） */
+    .plaque-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 18px 4px;
+      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    }
+    .plaque-badge {
+      font-size: 11px;
+      color: #9ab4ce;
+      letter-spacing: 2px;
+    }
+    .pinyin-toggle-btn {
+      background: rgba(212, 175, 55, 0.15);
+      border: 1px solid var(--gold-border);
+      color: var(--gold-light);
+      padding: 3px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .pinyin-toggle-btn:hover {
+      background: var(--gold-primary);
+      color: var(--navy-dark);
+    }
+
+    /* 歌词视窗 */
+    .lyrics-viewport {
+      height: 250px;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+      padding: 85px 24px;
+      position: relative;
+      mask-image: linear-gradient(to bottom, transparent 0%, black 25%, black 75%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 25%, black 75%, transparent 100%);
+    }
+    .lyrics-viewport::-webkit-scrollbar {
+      width: 4px;
+    }
+    .lyrics-viewport::-webkit-scrollbar-thumb {
+      background: rgba(212, 175, 55, 0.25);
+      border-radius: 4px;
+    }
+
+    .lyric-line {
+      text-align: center;
+      font-size: 17.5px;
+      line-height: 2;
+      color: #8da4bc;
+      margin: 12px 0;
+      padding: 8px 16px;
+      border-radius: 6px;
+      transition: all 0.35s ease;
+      cursor: pointer;
+      font-family: "KaiTi", "STKaiti", "楷体", serif;
+      user-select: none;
+    }
+    .lyric-line:hover {
+      color: #d6e4f0;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    /* 播放中高亮样式 */
+    .lyric-line.active {
+      color: #fff4d0;
+      font-size: 21.5px;
+      font-weight: bold;
+      text-shadow: 
+        0 0 12px rgba(243, 229, 171, 0.8),
+        0 0 25px rgba(212, 175, 55, 0.45);
+      transform: scale(1.02);
+    }
+
+    /* 拼音排版控制 */
+    ruby {
+      ruby-position: over;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      vertical-align: bottom;
+      padding: 0 1px;
+    }
+    rt {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 0.52em;
+      letter-spacing: 0;
+      line-height: 1.1;
+      color: #b0c6dc;
+      font-weight: normal;
+      display: none; /* 默认隐藏拼音 */
+    }
+    .show-pinyin rt {
+      display: block;
+    }
+    .lyric-line.active rt {
+      color: #ffd875;
+      text-shadow: 0 0 6px rgba(255, 216, 117, 0.6);
+    }
+
+    /* 控制台区域 */
+    .player-controls-zone {
+      background: rgba(255, 255, 255, 0.55);
+      border: 1px solid #dfd4bf;
+      border-radius: 8px;
+      padding: 14px 22px;
+      margin-bottom: 24px;
+    }
+    .timeline-bar-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .time-txt {
+      font-family: monospace;
+      font-size: 13px;
+      color: #55493b;
+      min-width: 54px;
+      font-weight: 600;
+    }
+    .seek-slider {
+      flex: 1;
+      height: 6px;
+      accent-color: #d97706;
+      cursor: pointer;
+    }
+    .controls-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .btn-group-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .ctrl-circle-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #eee3cf;
+      border: 1px solid #cdbfa7;
+      color: #433626;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      transition: all 0.2s;
+    }
+    .ctrl-circle-btn:hover {
+      background: #e2d3ba;
+    }
+    .play-master-btn {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      border: 1px solid #b45309;
+      color: #fff;
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(217, 119, 6, 0.35);
+      transition: all 0.2s;
+    }
+    .play-master-btn:hover {
+      transform: scale(1.05);
+    }
+    .btn-pill {
+      background: #f1e7d2;
+      border: 1px solid #cdbfa7;
+      padding: 5px 12px;
+      border-radius: 16px;
+      font-size: 12px;
+      cursor: pointer;
+      color: #534533;
+      transition: all 0.2s;
+    }
+    .btn-pill.active {
+      background: #8a2a1f;
+      color: #fff;
+      border-color: #8a2a1f;
+    }
+
+    /* 音频上传/状态按钮 */
+    .upload-audio-btn {
+      background: #172739;
+      border: 1px solid var(--gold-border);
+      color: #f7e7be;
+      padding: 6px 14px;
+      border-radius: 18px;
+      font-size: 12.5px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .upload-audio-btn:hover {
+      background: #233c57;
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    /* ================================================= */
+    /* 本课生字（字、结构、笔顺、组词）专区 */
+    /* ================================================= */
+    .vocab-section {
+      border-top: 2px dashed #d6c6ad;
+      padding-top: 20px;
+      margin-top: 8px;
+    }
+    .vocab-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .vocab-title {
+      font-family: "KaiTi", "STKaiti", "楷体", serif;
+      font-size: 20px;
+      font-weight: bold;
+      color: var(--cinnabar-red);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: 2px;
+    }
+    .vocab-hint {
+      font-size: 12px;
+      color: #817260;
+    }
+
+    /* 生字网格卡片列表：响应式排布 */
+    .vocab-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(460px, 1fr));
+      gap: 14px;
+    }
+    @media (max-width: 600px) {
+      .vocab-grid {
+        grid-template-columns: 1fr;
+      }
+      .book-cover-frame {
+        padding: 20px 14px;
+      }
+    }
+
+    /* 单个生字条目：严格顺序 [字] -> [结构] -> [笔顺(米字格)] -> [组词] */
+    .vocab-card {
+      background: rgba(255, 255, 255, 0.72);
+      border: 1.5px solid #ded3be;
+      border-radius: 8px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+      transition: all 0.25s;
+    }
+    .vocab-card:hover {
+      background: #ffffff;
+      border-color: #c9b38c;
+      box-shadow: 0 4px 12px rgba(138, 40, 30, 0.1);
+      transform: translateY(-1px);
+    }
+
+    /* 1. 字 */
+    .v-char-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 50px;
+    }
+    .v-pinyin {
+      font-size: 13px;
+      color: #a14434;
+      font-weight: 600;
+      font-family: -apple-system, sans-serif;
+    }
+    .v-char-big {
+      font-family: "KaiTi", "STKaiti", "楷体", serif;
+      font-size: 34px;
+      font-weight: bold;
+      color: #1e1b18;
+      line-height: 1.1;
+    }
+
+    /* 2. 结构 */
+    .v-structure-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-width: 70px;
+    }
+    .v-structure-badge {
+      background: #f5ebe0;
+      color: #8f281e;
+      border: 1px solid #debfaa;
+      font-size: 11.5px;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .v-strokes-count {
+      font-size: 11px;
+      color: #8c7b66;
+      margin-top: 3px;
+    }
+
+    /* 3. 笔顺动画（单个米字格） */
+    .v-writer-col {
+      position: relative;
+      width: 72px;
+      height: 72px;
+      background-color: #fffaf0;
+      border: 1.5px solid var(--grid-red);
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      overflow: hidden;
+      box-shadow: inset 0 0 5px rgba(194, 65, 12, 0.15);
+      flex-shrink: 0;
+    }
+    .v-writer-col:hover {
+      box-shadow: 0 0 0 2px rgba(194, 65, 12, 0.4);
+    }
+    .mizige-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    .writer-target {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 72px;
+      height: 72px;
+    }
+    .replay-tip {
+      position: absolute;
+      bottom: 1px;
+      right: 2px;
+      font-size: 9px;
+      color: #ca8a04;
+      pointer-events: none;
+      background: rgba(255,255,255,0.75);
+      border-radius: 2px;
+      padding: 0 2px;
+    }
+
+    /* 4. 组词 */
+    .v-words-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      padding-left: 6px;
+      border-left: 1px dashed #dfd4bf;
+    }
+    .v-words-label {
+      font-size: 11px;
+      color: #8c7e6c;
+      font-weight: 500;
+    }
+    .v-words-pills {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .word-pill {
+      background: #f7f1e4;
+      border: 1px solid #dcd0bc;
+      color: #3b3226;
+      font-size: 13.5px;
+      font-family: "KaiTi", "STKaiti", "楷体", serif;
+      font-weight: bold;
+      padding: 3px 9px;
+      border-radius: 4px;
+      letter-spacing: 1px;
+    }
+    .word-pill:hover {
+      border-color: #bfa67c;
+      background: #fcf8f0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="book-cover-frame">
+
+    <!-- 顶部居中标题区 -->
+    <div class="header-zone">
+      <div class="header-meta">❖ 统编小学语文 · 经典课文诵读 ❖</div>
+      <div class="main-title" contenteditable="true" title="点击可编辑标题">日月潭</div>
+    </div>
+
+    <!-- 核心藏青金边皮纹铭牌（歌词视窗） -->
+    <div class="plaque-wrapper">
+      <div class="plaque-gold-rim">
+        
+        <!-- 铭牌顶部工具栏 -->
+        <div class="plaque-toolbar">
+          <div class="plaque-badge">✦ 同步诵读视窗 ✦</div>
+          <button class="pinyin-toggle-btn" id="pinyinToggleBtn" onclick="togglePinyin()">
+            🔤 拼音: 关
+          </button>
+        </div>
+
+        <!-- 歌词居中平滑滚动窗口 -->
+        <div class="lyrics-viewport" id="lyricsViewport">
+          <!-- 4 句根据时间戳自动挂载 -->
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 播放器控制台 -->
+    <div class="player-controls-zone">
+      <div class="timeline-bar-box">
+        <span class="time-txt" id="currentTime">00:00.0</span>
+        <!-- 总音频时长精确为 38.50 秒 -->
+        <input type="range" class="seek-slider" id="seekSlider" min="0" max="38.50" step="0.05" value="0">
+        <span class="time-txt" id="totalDuration">00:38.5</span>
+      </div>
+
+      <div class="controls-row">
+        <!-- 播放控制与循环 -->
+        <div class="btn-group-left">
+          <button class="ctrl-circle-btn" onclick="prevSentence()" title="上一句">⏮</button>
+          <button class="play-master-btn" id="playBtn" onclick="togglePlay()" title="播放/暂停">▶</button>
+          <button class="ctrl-circle-btn" onclick="nextSentence()" title="下一句">⏭</button>
+          <button class="btn-pill" id="repeatBtn" onclick="toggleRepeatSentence()">单句复读: 关</button>
+        </div>
+
+        <!-- 音频上传与状态 -->
+        <div style="display:flex; align-items:center; gap:10px;">
+          <input type="file" id="audioInput" accept="audio/*" style="display:none;" onchange="handleAudioUpload(event)">
+          <button class="upload-audio-btn" onclick="document.getElementById('audioInput').click()">
+            <span>🎵</span>
+            <span id="uploadBtnText">正在连接云端音频…</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- 本课生字（字、结构、笔顺、组词）专区 -->
+    <!-- ============================================== -->
+    <div class="vocab-section">
+      <div class="vocab-header-row">
+        <div class="vocab-title">
+          <span>✎</span>
+          <span>本课生字 · 结构与笔顺</span>
+        </div>
+        <div class="vocab-hint">
+          <span>（顺序：字 ➔ 结构 ➔ 笔顺单格动画 ➔ 组词 · 点击米字格可重播书写）</span>
+        </div>
+      </div>
+
+      <!-- 生字列表容器 -->
+      <div class="vocab-grid" id="vocabGrid">
+        <!-- 8 个生字条目由 JS 循环渲染 -->
+      </div>
+    </div>
+
+  </div>
+
+  <audio id="audioPlayer" preload="auto"></audio>
+
+  <script>
+    /* ================= 1. 严格依据《10月25日_时间戳.docx》制作的课文与时间戳数据 ================= */
+    const lyricsData = [
+      {
+        id: 1, 
+        start: 0.070, 
+        end: 12.860,
+        text: "日月潭很深，湖水碧绿，湖中央有个美丽的小岛，把湖水分成两半，北边像圆圆的太阳叫日潭，南边像弯弯的月亮叫月潭。",
+        ruby: "<ruby>日<rt>rì</rt></ruby><ruby>月<rt>yuè</rt></ruby><ruby>潭<rt>tán</rt></ruby><ruby>很<rt>hěn</rt></ruby><ruby>深<rt>shēn</rt></ruby>，<ruby>湖<rt>hú</rt></ruby><ruby>水<rt>shuǐ</rt></ruby><ruby>碧<rt>bì</rt></ruby><ruby>绿<rt>lǜ</rt></ruby>，<ruby>湖<rt>hú</rt></ruby><ruby>中<rt>zhōng</rt></ruby><ruby>央<rt>yāng</rt></ruby><ruby>有<rt>yǒu</rt></ruby><ruby>个<rt>gè</rt></ruby><ruby>美<rt>měi</rt></ruby><ruby>丽<rt>lì</rt></ruby><ruby>的<rt>de</rt></ruby><ruby>小<rt>xiǎo</rt></ruby><ruby>岛<rt>dǎo</rt></ruby>，<ruby>把<rt>bǎ</rt></ruby><ruby>湖<rt>hú</rt></ruby><ruby>水<rt>shuǐ</rt></ruby><ruby>分<rt>fēn</rt></ruby><ruby>成<rt>chéng</rt></ruby><ruby>两<rt>liǎng</rt></ruby><ruby>半<rt>bàn</rt></ruby>，<ruby>北<rt>běi</rt></ruby><ruby>边<rt>bian</rt></ruby><ruby>像<rt>xiàng</rt></ruby><ruby>圆<rt>yuán</rt></ruby><ruby>圆<rt>yuán</rt></ruby><ruby>的<rt>de</rt></ruby><ruby>太<rt>tài</rt></ruby><ruby>阳<rt>yáng</rt></ruby><ruby>叫<rt>jiào</rt></ruby><ruby>日<rt>rì</rt></ruby><ruby>潭<rt>tán</rt></ruby>，<ruby>南<rt>nán</rt></ruby><ruby>边<rt>bian</rt></ruby><ruby>像<rt>xiàng</rt></ruby><ruby>弯<rt>wān</rt></ruby><ruby>弯<rt>wān</rt></ruby><ruby>的<rt>de</rt></ruby><ruby>月<rt>yuè</rt></ruby><ruby>亮<rt>liang</rt></ruby><ruby>叫<rt>jiào</rt></ruby><ruby>月<rt>yuè</rt></ruby><ruby>潭<rt>tán</rt></ruby>。"
+      },
+      {
+        id: 2, 
+        start: 13.150, 
+        end: 21.585,
+        text: "清晨，湖面上飘着薄薄的雾，天边的晨星和山上的点点灯光隐隐约约的倒映在湖水中。",
+        ruby: "<ruby>清<rt>qīng</rt></ruby><ruby>晨<rt>chén</rt></ruby>，<ruby>湖<rt>hú</rt></ruby><ruby>面<rt>miàn</rt></ruby><ruby>上<rt>shang</rt></ruby><ruby>飘<rt>piāo</rt></ruby><ruby>着<rt>zhe</rt></ruby><ruby>薄<rt>báo</rt></ruby><ruby>薄<rt>báo</rt></ruby><ruby>的<rt>de</rt></ruby><ruby>雾<rt>wù</rt></ruby>，<ruby>天<rt>tiān</rt></ruby><ruby>边<rt>biān</rt></ruby><ruby>的<rt>de</rt></ruby><ruby>晨<rt>chén</rt></ruby><ruby>星<rt>xīng</rt></ruby><ruby>和<rt>hé</rt></ruby><ruby>山<rt>shān</rt></ruby><ruby>上<rt>shang</rt></ruby><ruby>的<rt>de</rt></ruby><ruby>点<rt>diǎn</rt></ruby><ruby>点<rt>diǎn</rt></ruby><ruby>灯<rt>dēng</rt></ruby><ruby>光<rt>guāng</rt></ruby>，<ruby>隐<rt>yǐn</rt></ruby><ruby>隐<rt>yǐn</rt></ruby><ruby>约<rt>yuē</rt></ruby><ruby>约<rt>yuē</rt></ruby><ruby>的<rt>de</rt></ruby><ruby>倒<rt>dào</rt></ruby><ruby>映<rt>yìng</rt></ruby><ruby>在<rt>zài</rt></ruby><ruby>湖<rt>hú</rt></ruby><ruby>水<rt>shuǐ</rt></ruby><ruby>中<rt>zhōng</rt></ruby>。"
+      },
+      {
+        id: 3, 
+        start: 21.585, 
+        end: 28.850,
+        text: "中午，太阳高照，整个日月潭的美景和周围的建筑都清晰的展现在眼前。",
+        ruby: "<ruby>中<rt>zhōng</rt></ruby><ruby>午<rt>wǔ</rt></ruby>，<ruby>太<rt>tài</rt></ruby><ruby>阳<rt>yáng</rt></ruby><ruby>高<rt>gāo</rt></ruby><ruby>照<rt>zhào</rt></ruby>，<ruby>整<rt>zhěng</rt></ruby><ruby>个<rt>gè</rt></ruby><ruby>日<rt>rì</rt></ruby><ruby>月<rt>yuè</rt></ruby><ruby>潭<rt>tán</rt></ruby><ruby>的<rt>de</rt></ruby><ruby>美<rt>měi</rt></ruby><ruby>景<rt>jǐng</rt></ruby><ruby>和<rt>hé</rt></ruby><ruby>周<rt>zhōu</rt></ruby><ruby>围<rt>wéi</rt></ruby><ruby>的<rt>de</rt></ruby><ruby>建<rt>jiàn</rt></ruby><ruby>筑<rt>zhù</rt></ruby>，<ruby>都<rt>dōu</rt></ruby><ruby>清<rt>qīng</rt></ruby><ruby>晰<rt>xī</rt></ruby><ruby>的<rt>de</rt></ruby><ruby>展<rt>zhǎn</rt></ruby><ruby>现<rt>xiàn</rt></ruby><ruby>在<rt>zài</rt></ruby><ruby>眼<rt>yǎn</rt></ruby><ruby>前<rt>qián</rt></ruby>。"
+      },
+      {
+        id: 4, 
+        start: 29.200, 
+        end: 37.730,
+        text: "要是下起蒙蒙细雨，日月潭好像披上轻纱，周围的景物一片朦胧，就像童话中的仙境。",
+        ruby: "<ruby>要<rt>yào</rt></ruby><ruby>是<rt>shi</rt></ruby><ruby>下<rt>xià</rt></ruby><ruby>起<rt>qǐ</rt></ruby><ruby>蒙<rt>méng</rt></ruby><ruby>蒙<rt>méng</rt></ruby><ruby>细<rt>xì</rt></ruby><ruby>雨<rt>yǔ</rt></ruby>，<ruby>日<rt>rì</rt></ruby><ruby>月<rt>yuè</rt></ruby><ruby>潭<rt>tán</rt></ruby><ruby>好<rt>hǎo</rt></ruby><ruby>像<rt>xiàng</rt></ruby><ruby>披<rt>pī</rt></ruby><ruby>上<rt>shang</rt></ruby><ruby>轻<rt>qīng</rt></ruby><ruby>纱<rt>shā</rt></ruby>，<ruby>周<rt>zhōu</rt></ruby><ruby>围<rt>wéi</rt></ruby><ruby>的<rt>de</rt></ruby><ruby>景<rt>jǐng</rt></ruby><ruby>物<rt>wù</rt></ruby><ruby>一<rt>yí</rt></ruby><ruby>片<rt>piàn</rt></ruby><ruby>朦<rt>méng</rt></ruby><ruby>胧<rt>lóng</rt></ruby>，<ruby>就<rt>jiù</rt></ruby><ruby>像<rt>xiàng</rt></ruby><ruby>童<rt>tóng</rt></ruby><ruby>话<rt>huà</rt></ruby><ruby>中<rt>zhōng</rt></ruby><ruby>的<rt>de</rt></ruby><ruby>仙<rt>xiān</rt></ruby><ruby>境<rt>jìng</rt></ruby>。"
+      }
+    ];
+
+    /* ================= 2. 本课生字数据 (字、拼音、结构、笔画、组词) ================= */
+    const vocabList = [
+      { char: '湖', pinyin: 'hú',   structure: '左中右结构', strokes: 12, words: ['湖水', '湖面', '西湖'] },
+      { char: '胜', pinyin: 'shèng',structure: '左右结构',   strokes: 9,  words: ['名胜', '胜利', '胜地'] },
+      { char: '弯', pinyin: 'wān',  structure: '上下结构',   strokes: 9,  words: ['弯曲', '转弯', '弯月'] },
+      { char: '就', pinyin: 'jiù',  structure: '左右结构',   strokes: 12, words: ['就是', '就要', '成就'] },
+      { char: '区', pinyin: 'qū',   structure: '半包围结构', strokes: 4,  words: ['风景区', '区别', '地区'] },
+      { char: '岛', pinyin: 'dǎo',  structure: '半包围结构', strokes: 7,  words: ['小岛', '群岛', '海岛'] },
+      { char: '现', pinyin: 'xiàn', structure: '左右结构',   strokes: 8,  words: ['展现', '现在', '发现'] },
+      { char: '外', pinyin: 'wài',  structure: '左右结构',   strokes: 5,  words: ['外面', '格外', '外头'] }
+    ];
+
+    /* ================= 3. 页面初始化与笔顺构建 ================= */
+    const audio = document.getElementById('audioPlayer');
+    const lyricsViewport = document.getElementById('lyricsViewport');
+    const vocabGrid = document.getElementById('vocabGrid');
+    const seekSlider = document.getElementById('seekSlider');
+    const currentTimeEl = document.getElementById('currentTime');
+    const totalDurationEl = document.getElementById('totalDuration');
+    const playBtn = document.getElementById('playBtn');
+    const repeatBtn = document.getElementById('repeatBtn');
+
+    let isPinyinVisible = false;
+    let isRepeatSentence = false;
+    let currentIndex = -1;
+    const writersMap = {};
+
+    // 初始化歌词
+    lyricsData.forEach((item, index) => {
+      const lineDiv = document.createElement('div');
+      lineDiv.className = 'lyric-line';
+      lineDiv.id = `line-${index}`;
+      lineDiv.innerHTML = item.ruby;
+      lineDiv.onclick = () => jumpToSentence(index);
+      lyricsViewport.appendChild(lineDiv);
+    });
+
+    // 初始化生词区域（严格顺序：字 ➔ 结构 ➔ 笔顺 ➔ 组词）
+    vocabList.forEach((item, idx) => {
+      const card = document.createElement('div');
+      card.className = 'vocab-card';
+      const writerId = `writer-box-${idx}`;
+
+      card.innerHTML = `
+        <!-- 1. 字 -->
+        <div class="v-char-col">
+          <span class="v-pinyin">${item.pinyin}</span>
+          <span class="v-char-big">${item.char}</span>
+        </div>
+
+        <!-- 2. 结构 -->
+        <div class="v-structure-col">
+          <span class="v-structure-badge">${item.structure}</span>
+          <span class="v-strokes-count">${item.strokes} 画</span>
+        </div>
+
+        <!-- 3. 笔顺动画（米字格内逐步书写） -->
+        <div class="v-writer-col" title="点击重播笔顺动画" onclick="replayStroke('${item.char}')">
+          <svg class="mizige-svg" viewBox="0 0 100 100">
+            <line x1="0" y1="50" x2="100" y2="50" stroke="#fca5a5" stroke-dasharray="3,3" stroke-width="1.2"/>
+            <line x1="50" y1="0" x2="50" y2="100" stroke="#fca5a5" stroke-dasharray="3,3" stroke-width="1.2"/>
+            <line x1="0" y1="0" x2="100" y2="100" stroke="#fed7aa" stroke-dasharray="3,3" stroke-width="0.9"/>
+            <line x1="100" y1="0" x2="0" y2="100" stroke="#fed7aa" stroke-dasharray="3,3" stroke-width="0.9"/>
+          </svg>
+          <div id="${writerId}" class="writer-target"></div>
+          <span class="replay-tip">重播</span>
+        </div>
+
+        <!-- 4. 组词 -->
+        <div class="v-words-col">
+          <span class="v-words-label">词语运用</span>
+          <div class="v-words-pills">
+            ${item.words.map(w => `<span class="word-pill">${w}</span>`).join('')}
+          </div>
+        </div>
+      `;
+      vocabGrid.appendChild(card);
+    });
+
+    // 页面加载完成后实例化 HanziWriter
+    window.addEventListener('DOMContentLoaded', () => {
+      vocabList.forEach((item, idx) => {
+        const writerId = `writer-box-${idx}`;
+        if (typeof HanziWriter !== 'undefined') {
+          try {
+            const writer = HanziWriter.create(writerId, item.char, {
+              width: 72,
+              height: 72,
+              padding: 5,
+              showOutline: true,
+              strokeAnimationSpeed: 1.2,
+              delayBetweenStrokes: 160,
+              strokeColor: '#8a1f11', // 典雅朱砂红墨
+              outlineColor: '#edd8b0', // 浅金轮廓底色
+              drawingWidth: 3
+            });
+            writersMap[item.char] = writer;
+            writer.animateCharacter();
+          } catch (e) {
+            console.error("加载笔顺出错:", e);
+          }
+        }
+      });
+    });
+
+    function replayStroke(char) {
+      if (writersMap[char]) {
+        writersMap[char].animateCharacter();
+      }
+    }
+
+    /* ================= 4. 音频播放与时间戳对齐 ================= */
+
+    /* ---------- 云端音频配置（腾讯云 COS 公有读直链） ----------
+       无签名参数、无过期时间，永久有效。
+       换音频只需改这两个常量，下方 4 句时间戳无需改动。          */
+    const ONLINE_AUDIO_URL = "https://kewen-1452417664.cos.ap-guangzhou.myqcloud.com/%E6%97%A5%E6%9C%88%E6%BD%AD.MP3";
+    const ONLINE_AUDIO_NAME = "日月潭.MP3";
+
+    // 页面载入即挂载云端音频：打开网页就能直接播放，不再依赖同目录 MP3
+    function tryLoadDefaultAudio() {
+      audio.src = ONLINE_AUDIO_URL;
+      audio.load();
+    }
+    tryLoadDefaultAudio();
+
+    audio.addEventListener('loadedmetadata', () => {
+      seekSlider.max = audio.duration;
+      totalDurationEl.textContent = formatTime(audio.duration);
+      document.getElementById('uploadBtnText').textContent = '云端音频: ' + ONLINE_AUDIO_NAME;
+    });
+
+    audio.addEventListener('error', () => {
+      document.getElementById('uploadBtnText').textContent = '云端加载失败，请点此选择本地音频';
+    });
+
+    // 本地文件上传支持
+    function handleAudioUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const url = URL.createObjectURL(file);
+        audio.src = url;
+        document.getElementById('uploadBtnText').textContent = '已载入: ' + file.name.substring(0, 14);
+        audio.play().then(() => {
+          playBtn.textContent = '❚❚';
+        }).catch(() => {});
+      }
+    }
+
+    function togglePlay() {
+      if (!audio.src || audio.error) {
+        document.getElementById('audioInput').click();
+        return;
+      }
+      if (audio.paused) {
+        audio.play();
+        playBtn.textContent = '❚❚';
+      } else {
+        audio.pause();
+        playBtn.textContent = '▶';
+      }
+    }
+
+    function toggleRepeatSentence() {
+      isRepeatSentence = !isRepeatSentence;
+      repeatBtn.classList.toggle('active', isRepeatSentence);
+      repeatBtn.textContent = isRepeatSentence ? '单句复读: 开' : '单句复读: 关';
+    }
+
+    function togglePinyin() {
+      isPinyinVisible = !isPinyinVisible;
+      lyricsViewport.classList.toggle('show-pinyin', isPinyinVisible);
+      document.getElementById('pinyinToggleBtn').textContent = isPinyinVisible ? '🔤 拼音: 开' : '🔤 拼音: 关';
+      if (currentIndex !== -1) scrollToCenter(currentIndex);
+    }
+
+    function jumpToSentence(idx) {
+      if (idx < 0 || idx >= lyricsData.length) return;
+      audio.currentTime = lyricsData[idx].start;
+      if (audio.paused && audio.src) {
+        audio.play();
+        playBtn.textContent = '❚❚';
+      }
+      updateActiveLyric(idx);
+    }
+
+    function prevSentence() {
+      if (currentIndex > 0) jumpToSentence(currentIndex - 1);
+      else jumpToSentence(0);
+    }
+
+    function nextSentence() {
+      if (currentIndex < lyricsData.length - 1) jumpToSentence(currentIndex + 1);
+    }
+
+    // 核心时间更新与高亮滚动对齐
+    audio.addEventListener('timeupdate', () => {
+      const cur = audio.currentTime;
+      seekSlider.value = cur;
+      currentTimeEl.textContent = formatTime(cur);
+
+      // 匹配当前句子
+      const activeIdx = lyricsData.findIndex(item => cur >= item.start && cur < item.end);
+      
+      // 单句复读逻辑
+      if (isRepeatSentence && currentIndex !== -1) {
+        const curSentence = lyricsData[currentIndex];
+        if (cur >= curSentence.end) {
+          audio.currentTime = curSentence.start;
+          return;
+        }
+      }
+
+      if (activeIdx !== -1 && activeIdx !== currentIndex) {
+        updateActiveLyric(activeIdx);
+      }
+    });
+
+    seekSlider.addEventListener('input', (e) => {
+      audio.currentTime = parseFloat(e.target.value);
+    });
+
+    function updateActiveLyric(idx) {
+      if (currentIndex !== -1) {
+        const prevEl = document.getElementById(`line-${currentIndex}`);
+        if (prevEl) prevEl.classList.remove('active');
+      }
+      currentIndex = idx;
+      const curEl = document.getElementById(`line-${idx}`);
+      if (curEl) {
+        curEl.classList.add('active');
+        scrollToCenter(idx);
+      }
+    }
+
+    function scrollToCenter(idx) {
+      const lineEl = document.getElementById(`line-${idx}`);
+      if (!lineEl) return;
+      const containerHeight = lyricsViewport.clientHeight;
+      const lineTop = lineEl.offsetTop;
+      const lineHeight = lineEl.clientHeight;
+      lyricsViewport.scrollTo({
+        top: lineTop - (containerHeight / 2) + (lineHeight / 2),
+        behavior: 'smooth'
+      });
+    }
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      const ms = Math.floor((sec % 1) * 10);
+      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}.${ms}`;
+    }
+  </script>
+</body>
+</html>
